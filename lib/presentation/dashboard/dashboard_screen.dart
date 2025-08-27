@@ -106,9 +106,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: const CustomBottomBar(
+      bottomNavigationBar: CustomBottomBar(
         currentIndex: 0,
-        onTap: null,
+        onTap: (index) => CustomBottomBar.handleNavigation(context, index),
       ),
     );
   }
@@ -283,19 +283,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Expanded(
               child: _buildActionButton(
+                'Smart Planner',
+                Icons.psychology,
+                Colors.purple,
+                () => Navigator.pushNamed(context, AppRoutes.workoutPlanner),
+              ),
+            ),
+            SizedBox(width: 3.w),
+            Expanded(
+              child: _buildActionButton(
                 'Start Workout',
                 Icons.play_arrow,
                 Colors.green,
                 () => Navigator.pushNamed(context, AppRoutes.workoutSession),
               ),
             ),
-            SizedBox(width: 3.w),
+          ],
+        ),
+        SizedBox(height: 3.w),
             Expanded(
               child: _buildActionButton(
                 'Browse Exercises',
                 Icons.search,
                 Colors.blue,
-                () => Navigator.pushNamed(context, AppRoutes.exerciseLibrary),
+                () => Navigator.pushNamed(context, AppRoutes.exerciseBrowser),
               ),
             ),
           ],

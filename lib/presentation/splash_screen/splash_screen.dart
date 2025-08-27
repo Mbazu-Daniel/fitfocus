@@ -113,19 +113,9 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   void _navigateToNextScreen() {
-    // Simulate authentication check and navigation logic
-    // In a real app, this would check actual user state
-    final isFirstTime = true; // Mock check for first-time user
-    final isAuthenticated = false; // Mock authentication status
-
-    String targetRoute;
-    if (isFirstTime) {
-      targetRoute = '/onboarding-flow';
-    } else if (isAuthenticated) {
-      targetRoute = '/pomodoro-timer'; // Main dashboard
-    } else {
-      targetRoute = '/onboarding-flow'; // Login screen would be here
-    }
+    // For testing purposes, navigate directly to dashboard
+    // In production, this would check authentication status
+    String targetRoute = '/dashboard';
 
     // Smooth transition to next screen
     Navigator.pushReplacementNamed(context, targetRoute);

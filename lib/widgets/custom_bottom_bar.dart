@@ -183,6 +183,11 @@ class CustomBottomBar extends StatelessWidget {
       BuildContext context, ThemeData theme) {
     return [
       BottomNavigationBarItem(
+        icon: _buildNavIcon(Icons.dashboard_outlined, Icons.dashboard),
+        label: 'Dashboard',
+        tooltip: 'Main Dashboard',
+      ),
+      BottomNavigationBarItem(
         icon: _buildNavIcon(Icons.timer_outlined, Icons.timer),
         label: 'Focus',
         tooltip: 'Pomodoro Timer',
@@ -198,6 +203,11 @@ class CustomBottomBar extends StatelessWidget {
         label: 'Progress',
         tooltip: 'Progress Tracking',
       ),
+      BottomNavigationBarItem(
+        icon: _buildNavIcon(Icons.directions_walk_outlined, Icons.directions_walk),
+        label: 'Steps',
+        tooltip: 'Step Counter',
+      ),
     ];
   }
 
@@ -212,9 +222,11 @@ class CustomBottomBar extends StatelessWidget {
   }
 
   int _getIconIndex(IconData icon) {
-    if (icon == Icons.timer_outlined) return 0;
-    if (icon == Icons.fitness_center_outlined) return 1;
-    if (icon == Icons.trending_up_outlined) return 2;
+    if (icon == Icons.dashboard_outlined) return 0;
+    if (icon == Icons.timer_outlined) return 1;
+    if (icon == Icons.fitness_center_outlined) return 2;
+    if (icon == Icons.trending_up_outlined) return 3;
+    if (icon == Icons.directions_walk_outlined) return 4;
     return -1;
   }
 
@@ -225,13 +237,19 @@ class CustomBottomBar extends StatelessWidget {
 
     switch (index) {
       case 0:
-        targetRoute = '/pomodoro-timer';
+        targetRoute = '/dashboard';
         break;
       case 1:
-        targetRoute = '/exercise-library';
+        targetRoute = '/pomodoro-timer';
         break;
       case 2:
+        targetRoute = '/exercise-library';
+        break;
+      case 3:
         targetRoute = '/progress-tracking';
+        break;
+      case 4:
+        targetRoute = '/step-counter';
         break;
       default:
         return;

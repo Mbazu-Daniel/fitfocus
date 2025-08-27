@@ -9,6 +9,13 @@ import '../presentation/auth/login_screen.dart';
 import '../presentation/auth/signup_screen.dart';
 import '../presentation/auth/forgot_password_screen.dart';
 import '../presentation/dashboard/dashboard_screen.dart';
+import '../presentation/step_counter/step_counter_screen.dart';
+import '../presentation/water_reminder/water_reminder_screen.dart';
+import '../presentation/posture_exercises/posture_exercises_screen.dart';
+import '../presentation/profile/profile_screen.dart';
+import '../presentation/workout_session/workout_session_screen.dart';
+import '../presentation/workout_planner/workout_planner_screen.dart';
+import '../presentation/exercise_browser/exercise_browser_screen.dart';
 
 class AppRoutes {
   // TODO: Add your routes here
@@ -31,6 +38,13 @@ class AppRoutes {
   static const String workoutHistory = '/workout-history';
   static const String goals = '/goals';
   static const String nutrition = '/nutrition';
+  
+  // Health and wellness routes
+  static const String stepCounter = '/step-counter';
+  static const String waterReminder = '/water-reminder';
+  static const String postureExercises = '/posture-exercises';
+  static const String workoutPlanner = '/workout-planner';
+  static const String exerciseBrowser = '/exercise-browser';
 
   // Keep existing initial route or change to dashboard
   static const String initial = splashScreen;
@@ -50,6 +64,15 @@ class AppRoutes {
 
         // New fitness routes,
         dashboard: (context) => const DashboardScreen(),
+        
+        // Health and wellness routes
+        stepCounter: (context) => const StepCounterScreen(),
+        waterReminder: (context) => const WaterReminderScreen(),
+        postureExercises: (context) => const PostureExercisesScreen(),
+        profile: (context) => const ProfileScreen(),
+        workoutSession: (context) => const WorkoutSessionScreen(),
+        workoutPlanner: (context) => const WorkoutPlannerScreen(),
+        exerciseBrowser: (context) => const ExerciseBrowserScreen(),
         // Add more routes as you create the screens
       };
 }
