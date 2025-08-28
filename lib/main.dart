@@ -4,17 +4,12 @@ import 'package:sizer/sizer.dart';
 
 import '../core/app_export.dart';
 import '../widgets/custom_error_widget.dart';
-import './services/supabase_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Supabase
-  try {
-    await SupabaseService.initialize();
-  } catch (e) {
-    debugPrint('Failed to initialize Supabase: $e');
-  }
+  // Mock data service is ready to use without initialization
+  debugPrint('Using mock data service for testing');
 
   // 🚨 CRITICAL: Custom error handling - DO NOT REMOVE
   ErrorWidget.builder = (FlutterErrorDetails details) {

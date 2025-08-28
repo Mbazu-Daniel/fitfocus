@@ -1,7 +1,4 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-import './supabase_service.dart';
-import 'supabase_service.dart';
+import './mock_data_service.dart';
 
 class FitnessService {
   static FitnessService? _instance;
@@ -9,20 +6,13 @@ class FitnessService {
 
   FitnessService._();
 
-  SupabaseClient get _client => SupabaseService.instance.client;
+  MockDataService get _mockService => MockDataService.instance;
 
   // User Profile Management
   Future<Map<String, dynamic>?> getUserProfile() async {
     try {
-      final user = _client.auth.currentUser;
-      if (user == null) return null;
-
-      final response = await _client
-          .from('user_profiles')
-          .select()
-          .eq('id', user.id)
-          .single();
-      return response;
+      await Future.delayed(Duration(milliseconds: 300)); // Simulate network delay
+      return _mockService.getUserProfile();
     } catch (error) {
       throw Exception('Failed to get user profile: $error');
     }
@@ -31,18 +21,8 @@ class FitnessService {
   Future<Map<String, dynamic>> updateUserProfile(
       Map<String, dynamic> data) async {
     try {
-      final user = _client.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
-
-      data['updated_at'] = DateTime.now().toIso8601String();
-
-      final response = await _client
-          .from('user_profiles')
-          .update(data)
-          .eq('id', user.id)
-          .select()
-          .single();
-      return response;
+      await Future.delayed(Duration(milliseconds: 500));
+      return _mockService.updateUserProfile(data);
     } catch (error) {
       throw Exception('Failed to update profile: $error');
     }
@@ -55,18 +35,12 @@ class FitnessService {
     int? limit,
   }) async {
     try {
-      var query = _client.from('exercises').select();
-
-      if (category != null) {
-        query = query.eq('category', category);
-      }
-      if (difficulty != null) {
-        query = query.eq('difficulty', difficulty);
-      }
-
-      final response =
-          await query.order('name', ascending: true).limit(limit ?? 50);
-      return List<Map<String, dynamic>>.from(response);
+      await Future.delayed(Duration(milliseconds: 400));
+      return _mockService.getExercises(
+        category: category,
+        difficulty: difficulty,
+        limit: limit,
+      );
     } catch (error) {
       throw Exception('Failed to get exercises: $error');
     }
@@ -74,12 +48,8 @@ class FitnessService {
 
   Future<Map<String, dynamic>?> getExerciseById(String exerciseId) async {
     try {
-      final response = await _client
-          .from('exercises')
-          .select()
-          .eq('id', exerciseId)
-          .single();
-      return response;
+      await Future.delayed(Duration(milliseconds: 200));
+      return _mockService.getExerciseById(exerciseId);
     } catch (error) {
       throw Exception('Failed to get exercise: $error');
     }
@@ -88,15 +58,8 @@ class FitnessService {
   // Workout Plans
   Future<List<Map<String, dynamic>>> getUserWorkoutPlans() async {
     try {
-      final user = _client.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
-
-      final response = await _client
-          .from('workout_plans')
-          .select()
-          .eq('user_id', user.id)
-          .order('created_at', ascending: false);
-      return List<Map<String, dynamic>>.from(response);
+      await Future.delayed(Duration(milliseconds: 300));
+      return _mockService.getUserWorkoutPlans();
     } catch (error) {
       throw Exception('Failed to get workout plans: $error');
     }
@@ -105,17 +68,8 @@ class FitnessService {
   Future<Map<String, dynamic>> createWorkoutPlan(
       Map<String, dynamic> planData) async {
     try {
-      final user = _client.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
-
-      planData['user_id'] = user.id;
-
-      final response = await _client
-          .from('workout_plans')
-          .insert(planData)
-          .select()
-          .single();
-      return response;
+      await Future.delayed(Duration(milliseconds: 600));
+      return _mockService.createWorkoutPlan(planData);
     } catch (error) {
       throw Exception('Failed to create workout plan: $error');
     }
@@ -124,13 +78,9 @@ class FitnessService {
   Future<List<Map<String, dynamic>>> getWorkoutPlanExercises(
       String planId) async {
     try {
-      final response = await _client
-          .from('workout_plan_exercises')
-          .select('*, exercises(*)')
-          .eq('workout_plan_id', planId)
-          .order('day_number', ascending: true)
-          .order('order_in_day', ascending: true);
-      return List<Map<String, dynamic>>.from(response);
+      await Future.delayed(Duration(milliseconds: 250));
+      // Mock implementation - return some exercises for the plan
+      return _mockService.getExercises(limit: 5);
     } catch (error) {
       throw Exception('Failed to get workout plan exercises: $error');
     }
@@ -140,19 +90,8 @@ class FitnessService {
   Future<Map<String, dynamic>> startWorkoutSession(
       Map<String, dynamic> sessionData) async {
     try {
-      final user = _client.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
-
-      sessionData['user_id'] = user.id;
-      sessionData['status'] = 'active';
-      sessionData['started_at'] = DateTime.now().toIso8601String();
-
-      final response = await _client
-          .from('workout_sessions')
-          .insert(sessionData)
-          .select()
-          .single();
-      return response;
+      await Future.delayed(Duration(milliseconds: 400));
+      return _mockService.startWorkoutSession(sessionData);
     } catch (error) {
       throw Exception('Failed to start workout session: $error');
     }
@@ -161,24 +100,16 @@ class FitnessService {
   Future<Map<String, dynamic>> completeWorkoutSession(String sessionId,
       {int? durationMinutes, int? caloriesBurned, String? notes}) async {
     try {
-      final updateData = <String, dynamic>{
+      await Future.delayed(Duration(milliseconds: 500));
+      // Mock implementation - return completed session
+      return {
+        'id': sessionId,
         'status': 'completed',
         'completed_at': DateTime.now().toIso8601String(),
+        'duration_minutes': durationMinutes ?? 30,
+        'calories_burned': caloriesBurned ?? 150,
+        'notes': notes,
       };
-
-      if (durationMinutes != null)
-        updateData['duration_minutes'] = durationMinutes;
-      if (caloriesBurned != null)
-        updateData['calories_burned'] = caloriesBurned;
-      if (notes != null) updateData['notes'] = notes;
-
-      final response = await _client
-          .from('workout_sessions')
-          .update(updateData)
-          .eq('id', sessionId)
-          .select()
-          .single();
-      return response;
     } catch (error) {
       throw Exception('Failed to complete workout session: $error');
     }
@@ -187,16 +118,8 @@ class FitnessService {
   Future<List<Map<String, dynamic>>> getUserWorkoutSessions(
       {int? limit}) async {
     try {
-      final user = _client.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
-
-      final response = await _client
-          .from('workout_sessions')
-          .select('*, workout_plans(name)')
-          .eq('user_id', user.id)
-          .order('created_at', ascending: false)
-          .limit(limit ?? 20);
-      return List<Map<String, dynamic>>.from(response);
+      await Future.delayed(Duration(milliseconds: 350));
+      return _mockService.getUserWorkoutSessions(limit: limit);
     } catch (error) {
       throw Exception('Failed to get workout sessions: $error');
     }
@@ -206,9 +129,12 @@ class FitnessService {
   Future<Map<String, dynamic>> addExerciseSet(
       Map<String, dynamic> setData) async {
     try {
-      final response =
-          await _client.from('exercise_sets').insert(setData).select().single();
-      return response;
+      await Future.delayed(Duration(milliseconds: 300));
+      return {
+        'id': 'set${DateTime.now().millisecondsSinceEpoch}',
+        'created_at': DateTime.now().toIso8601String(),
+        ...setData,
+      };
     } catch (error) {
       throw Exception('Failed to add exercise set: $error');
     }
@@ -217,13 +143,12 @@ class FitnessService {
   Future<Map<String, dynamic>> updateExerciseSet(
       String setId, Map<String, dynamic> updateData) async {
     try {
-      final response = await _client
-          .from('exercise_sets')
-          .update(updateData)
-          .eq('id', setId)
-          .select()
-          .single();
-      return response;
+      await Future.delayed(Duration(milliseconds: 250));
+      return {
+        'id': setId,
+        'updated_at': DateTime.now().toIso8601String(),
+        ...updateData,
+      };
     } catch (error) {
       throw Exception('Failed to update exercise set: $error');
     }
@@ -232,13 +157,26 @@ class FitnessService {
   Future<List<Map<String, dynamic>>> getSessionExerciseSets(
       String sessionId) async {
     try {
-      final response = await _client
-          .from('exercise_sets')
-          .select('*, exercises(name)')
-          .eq('workout_session_id', sessionId)
-          .order('exercise_id', ascending: true)
-          .order('set_number', ascending: true);
-      return List<Map<String, dynamic>>.from(response);
+      await Future.delayed(Duration(milliseconds: 200));
+      // Mock implementation - return some sets
+      return [
+        {
+          'id': 'set1',
+          'exercise_id': 'ex1',
+          'set_number': 1,
+          'reps': 10,
+          'weight': 20,
+          'exercises': {'name': 'Push-ups'},
+        },
+        {
+          'id': 'set2',
+          'exercise_id': 'ex1',
+          'set_number': 2,
+          'reps': 8,
+          'weight': 20,
+          'exercises': {'name': 'Push-ups'},
+        },
+      ];
     } catch (error) {
       throw Exception('Failed to get exercise sets: $error');
     }
@@ -248,17 +186,13 @@ class FitnessService {
   Future<Map<String, dynamic>> addBodyMeasurement(
       Map<String, dynamic> measurementData) async {
     try {
-      final user = _client.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
-
-      measurementData['user_id'] = user.id;
-
-      final response = await _client
-          .from('body_measurements')
-          .insert(measurementData)
-          .select()
-          .single();
-      return response;
+      await Future.delayed(Duration(milliseconds: 300));
+      return {
+        'id': 'measure${DateTime.now().millisecondsSinceEpoch}',
+        'user_id': _mockService.currentUser?['id'],
+        'measured_at': DateTime.now().toIso8601String(),
+        ...measurementData,
+      };
     } catch (error) {
       throw Exception('Failed to add body measurement: $error');
     }
@@ -267,17 +201,8 @@ class FitnessService {
   Future<List<Map<String, dynamic>>> getBodyMeasurements(String measurementType,
       {int? limit}) async {
     try {
-      final user = _client.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
-
-      final response = await _client
-          .from('body_measurements')
-          .select()
-          .eq('user_id', user.id)
-          .eq('measurement_type', measurementType)
-          .order('measured_at', ascending: false)
-          .limit(limit ?? 30);
-      return List<Map<String, dynamic>>.from(response);
+      await Future.delayed(Duration(milliseconds: 250));
+      return _mockService.getBodyMeasurements(measurementType, limit: limit);
     } catch (error) {
       throw Exception('Failed to get body measurements: $error');
     }
@@ -286,14 +211,8 @@ class FitnessService {
   // User Goals
   Future<Map<String, dynamic>> createGoal(Map<String, dynamic> goalData) async {
     try {
-      final user = _client.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
-
-      goalData['user_id'] = user.id;
-
-      final response =
-          await _client.from('user_goals').insert(goalData).select().single();
-      return response;
+      await Future.delayed(Duration(milliseconds: 400));
+      return _mockService.createGoal(goalData);
     } catch (error) {
       throw Exception('Failed to create goal: $error');
     }
@@ -301,15 +220,8 @@ class FitnessService {
 
   Future<List<Map<String, dynamic>>> getUserGoals() async {
     try {
-      final user = _client.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
-
-      final response = await _client
-          .from('user_goals')
-          .select()
-          .eq('user_id', user.id)
-          .order('created_at', ascending: false);
-      return List<Map<String, dynamic>>.from(response);
+      await Future.delayed(Duration(milliseconds: 300));
+      return _mockService.getUserGoals();
     } catch (error) {
       throw Exception('Failed to get user goals: $error');
     }
@@ -318,13 +230,12 @@ class FitnessService {
   Future<Map<String, dynamic>> updateGoalProgress(
       String goalId, double currentValue) async {
     try {
-      final response = await _client
-          .from('user_goals')
-          .update({'current_value': currentValue})
-          .eq('id', goalId)
-          .select()
-          .single();
-      return response;
+      await Future.delayed(Duration(milliseconds: 300));
+      return {
+        'id': goalId,
+        'current_value': currentValue,
+        'updated_at': DateTime.now().toIso8601String(),
+      };
     } catch (error) {
       throw Exception('Failed to update goal progress: $error');
     }
@@ -334,17 +245,13 @@ class FitnessService {
   Future<Map<String, dynamic>> logNutrition(
       Map<String, dynamic> nutritionData) async {
     try {
-      final user = _client.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
-
-      nutritionData['user_id'] = user.id;
-
-      final response = await _client
-          .from('nutrition_logs')
-          .insert(nutritionData)
-          .select()
-          .single();
-      return response;
+      await Future.delayed(Duration(milliseconds: 300));
+      return {
+        'id': 'nutrition${DateTime.now().millisecondsSinceEpoch}',
+        'user_id': _mockService.currentUser?['id'],
+        'logged_at': DateTime.now().toIso8601String(),
+        ...nutritionData,
+      };
     } catch (error) {
       throw Exception('Failed to log nutrition: $error');
     }
@@ -353,25 +260,8 @@ class FitnessService {
   Future<List<Map<String, dynamic>>> getNutritionLogs(DateTime date,
       {String? mealType}) async {
     try {
-      final user = _client.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
-
-      final startDate = DateTime(date.year, date.month, date.day);
-      final endDate = startDate.add(const Duration(days: 1));
-
-      var query = _client
-          .from('nutrition_logs')
-          .select()
-          .eq('user_id', user.id)
-          .gte('logged_at', startDate.toIso8601String())
-          .lt('logged_at', endDate.toIso8601String());
-
-      if (mealType != null) {
-        query = query.eq('meal_type', mealType);
-      }
-
-      final response = await query.order('logged_at', ascending: true);
-      return List<Map<String, dynamic>>.from(response);
+      await Future.delayed(Duration(milliseconds: 200));
+      return _mockService.getNutritionLogs(date, mealType: mealType);
     } catch (error) {
       throw Exception('Failed to get nutrition logs: $error');
     }
@@ -380,38 +270,8 @@ class FitnessService {
   // Statistics and Analytics
   Future<Map<String, dynamic>> getUserStats() async {
     try {
-      final user = _client.auth.currentUser;
-      if (user == null) throw Exception('User not authenticated');
-
-      // Get workout stats
-      final workoutData = await _client
-          .from('workout_sessions')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('status', 'completed')
-          .count();
-
-      // Get total exercise sets completed
-      final setsData = await _client
-          .from('exercise_sets')
-          .select('id')
-          .eq('completed', true);
-
-      // Get latest weight measurement
-      final weightData = await _client
-          .from('body_measurements')
-          .select('value')
-          .eq('user_id', user.id)
-          .eq('measurement_type', 'weight')
-          .order('measured_at', ascending: false)
-          .limit(1);
-
-      return {
-        'completed_workouts': workoutData.count ?? 0,
-        'total_sets_completed': setsData.length,
-        'current_weight': weightData.isNotEmpty ? weightData[0]['value'] : null,
-        'last_updated': DateTime.now().toIso8601String(),
-      };
+      await Future.delayed(Duration(milliseconds: 400));
+      return _mockService.getUserStats();
     } catch (error) {
       throw Exception('Failed to get user stats: $error');
     }

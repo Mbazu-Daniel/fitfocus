@@ -1,6 +1,4 @@
-import 'package:supabase_flutter/supabase_flutter.dart';
-
-import './supabase_service.dart';
+import './mock_data_service.dart';
 
 class AuthService {
   static AuthService? _instance;
@@ -8,48 +6,35 @@ class AuthService {
 
   AuthService._();
 
-  SupabaseClient get _client => SupabaseService.instance.client;
+  MockDataService get _mockService => MockDataService.instance;
 
   // Get current user
-  User? get currentUser => _client.auth.currentUser;
+  Map<String, dynamic>? get currentUser => _mockService.currentUser;
 
   // Check if user is authenticated
-  bool get isAuthenticated => _client.auth.currentUser != null;
+  bool get isAuthenticated => _mockService.isAuthenticated;
 
   // Sign up with email and password
-  Future<AuthResponse> signUp({
+  Future<bool> signUp({
     required String email,
     required String password,
     String? fullName,
     Map<String, dynamic>? metadata,
   }) async {
     try {
-      final response = await _client.auth.signUp(
-        email: email,
-        password: password,
-        data: {
-          'full_name': fullName ?? email.split('@')[0],
-          'role': 'member',
-          ...?metadata,
-        },
-      );
-      return response;
+      return await _mockService.signUp(email, password, fullName);
     } catch (error) {
       throw Exception('Sign-up failed: $error');
     }
   }
 
   // Sign in with email and password
-  Future<AuthResponse> signIn({
+  Future<bool> signIn({
     required String email,
     required String password,
   }) async {
     try {
-      final response = await _client.auth.signInWithPassword(
-        email: email,
-        password: password,
-      );
-      return response;
+      return await _mockService.signIn(email, password);
     } catch (error) {
       throw Exception('Sign-in failed: $error');
     }
@@ -58,7 +43,7 @@ class AuthService {
   // Sign out
   Future<void> signOut() async {
     try {
-      await _client.auth.signOut();
+      await _mockService.signOut();
     } catch (error) {
       throw Exception('Sign-out failed: $error');
     }
@@ -67,55 +52,48 @@ class AuthService {
   // Reset password
   Future<void> resetPassword(String email) async {
     try {
-      await _client.auth.resetPasswordForEmail(email);
+      await _mockService.resetPassword(email);
     } catch (error) {
       throw Exception('Password reset failed: $error');
     }
   }
 
   // Update password
-  Future<UserResponse> updatePassword(String newPassword) async {
+  Future<bool> updatePassword(String newPassword) async {
     try {
-      final response = await _client.auth.updateUser(
-        UserAttributes(password: newPassword),
-      );
-      return response;
+      // Mock implementation - always succeeds
+      await Future.delayed(Duration(milliseconds: 500));
+      return true;
     } catch (error) {
       throw Exception('Password update failed: $error');
     }
   }
 
   // Update user profile data
-  Future<UserResponse> updateUser({
+  Future<bool> updateUser({
     String? email,
     String? fullName,
     Map<String, dynamic>? metadata,
   }) async {
     try {
-      final attributes = UserAttributes();
-
-      if (email != null) attributes.email = email;
-      if (fullName != null || metadata != null) {
-        attributes.data = {
-          if (fullName != null) 'full_name': fullName,
-          ...?metadata,
+      // Mock implementation - always succeeds
+      await Future.delayed(Duration(milliseconds: 500));
+      if (fullName != null && currentUser != null) {
+        currentUser!['user_metadata'] = {
+          ...?currentUser!['user_metadata'],
+          'full_name': fullName,
         };
       }
-
-      final response = await _client.auth.updateUser(attributes);
-      return response;
+      return true;
     } catch (error) {
       throw Exception('User update failed: $error');
     }
   }
 
-  // Listen to auth state changes
-  Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
-
   // OAuth sign-in with Google
   Future<bool> signInWithGoogle() async {
     try {
-      return await _client.auth.signInWithOAuth(OAuthProvider.google);
+      return await _mockService.signInWithGoogle();
     } catch (error) {
       throw Exception('Google sign-in failed: $error');
     }
@@ -124,7 +102,9 @@ class AuthService {
   // OAuth sign-in with Apple
   Future<bool> signInWithApple() async {
     try {
-      return await _client.auth.signInWithOAuth(OAuthProvider.apple);
+      // Mock implementation - always succeeds
+      await Future.delayed(Duration(milliseconds: 1000));
+      return await _mockService.signInWithGoogle(); // Use same mock as Google
     } catch (error) {
       throw Exception('Apple sign-in failed: $error');
     }
@@ -133,18 +113,10 @@ class AuthService {
   // Get user role from profile
   Future<String?> getUserRole() async {
     try {
-      final user = currentUser;
-      if (user == null) return null;
-
-      final response = await _client
-          .from('user_profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
-
-      return response['role'];
+      if (!isAuthenticated) return null;
+      // Mock implementation - return default role
+      return 'member';
     } catch (error) {
-      // Return default role if profile not found
       return 'member';
     }
   }
@@ -169,16 +141,12 @@ class AuthService {
     return await hasRole('trainer');
   }
 
-  // Delete user account (requires admin privileges or own account)
+  // Delete user account
   Future<void> deleteAccount() async {
     try {
-      final user = currentUser;
-      if (user == null) throw Exception('No user logged in');
-
-      // First delete user profile (cascading will handle related data)
-      await _client.from('user_profiles').delete().eq('id', user.id);
-
-      // Then sign out
+      if (!isAuthenticated) throw Exception('No user logged in');
+      
+      // Mock implementation - just sign out
       await signOut();
     } catch (error) {
       throw Exception('Account deletion failed: $error');
