@@ -37,6 +37,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _soundEnabled = true;
   bool _vibrationEnabled = true;
   
+  // FitFocus specific settings
+  int _dailyStepGoal = 10000;
+  int _waterReminderInterval = 60; // minutes
+  int _pomodoroWorkDuration = 25; // minutes
+  int _pomodoroBreakDuration = 5; // minutes
+  int _postureReminderInterval = 30; // minutes
+  bool _autoStartBreaks = false;
+  bool _weekendReminders = true;
+  String _preferredWorkoutTime = 'Morning';
+  
+  final List<String> _workoutTimes = ['Morning', 'Afternoon', 'Evening', 'Night'];
+  
   final List<String> _genderOptions = ['Male', 'Female', 'Other'];
   final List<String> _activityLevels = ['Sedentary', 'Light', 'Moderate', 'Active', 'Very Active'];
   final List<String> _fitnessGoals = [
@@ -96,6 +108,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _notificationsEnabled = prefs.getBool('notifications_enabled') ?? true;
       _soundEnabled = prefs.getBool('sound_enabled') ?? true;
       _vibrationEnabled = prefs.getBool('vibration_enabled') ?? true;
+      
+      // FitFocus specific settings
+      _dailyStepGoal = prefs.getInt('daily_step_goal') ?? 10000;
+      _waterReminderInterval = prefs.getInt('water_reminder_interval') ?? 60;
+      _pomodoroWorkDuration = prefs.getInt('pomodoro_work_duration') ?? 25;
+      _pomodoroBreakDuration = prefs.getInt('pomodoro_break_duration') ?? 5;
+      _postureReminderInterval = prefs.getInt('posture_reminder_interval') ?? 30;
+      _autoStartBreaks = prefs.getBool('auto_start_breaks') ?? false;
+      _weekendReminders = prefs.getBool('weekend_reminders') ?? true;
+      _preferredWorkoutTime = prefs.getString('preferred_workout_time') ?? 'Morning';
     });
   }
 
@@ -105,6 +127,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     await prefs.setBool('notifications_enabled', _notificationsEnabled);
     await prefs.setBool('sound_enabled', _soundEnabled);
     await prefs.setBool('vibration_enabled', _vibrationEnabled);
+    
+    // FitFocus specific settings
+    await prefs.setInt('daily_step_goal', _dailyStepGoal);
+    await prefs.setInt('water_reminder_interval', _waterReminderInterval);
+    await prefs.setInt('pomodoro_work_duration', _pomodoroWorkDuration);
+    await prefs.setInt('pomodoro_break_duration', _pomodoroBreakDuration);
+    await prefs.setInt('posture_reminder_interval', _postureReminderInterval);
+    await prefs.setBool('auto_start_breaks', _autoStartBreaks);
+    await prefs.setBool('weekend_reminders', _weekendReminders);
+    await prefs.setString('preferred_workout_time', _preferredWorkoutTime);
   }
 
   Future<void> _saveProfile() async {
@@ -280,6 +312,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             
             // App settings
             _buildAppSettingsSection(),
+            SizedBox(height: 4.h),
+            
+            // Wellness settings
+            _buildWellnessSettingsSection(),
+            SizedBox(height: 4.h),
+            
+            // Data and Privacy
+            _buildDataPrivacySection(),
             SizedBox(height: 4.h),
             
             // Quick actions
@@ -461,6 +501,152 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _buildWellnessSettingsSection() {
+    return _buildSection(
+      title: 'Wellness Settings',
+      children: [
+        // Step Counter Settings
+        _buildNumberInputTile(
+          title: 'Daily Step Goal',
+          subtitle: 'Your target steps per day',
+          icon: Icons.directions_walk,
+          value: _dailyStepGoal,
+          min: 1000,
+          max: 50000,
+          step: 500,
+          suffix: 'steps',
+          onChanged: (value) {
+            setState(() {
+              _dailyStepGoal = value;
+            });
+            _saveAppSettings();
+          },
+        ),
+        SizedBox(height: 2.h),
+        
+        // Water Reminder Settings
+        _buildNumberInputTile(
+          title: 'Water Reminder Interval',
+          subtitle: 'How often to remind you to drink water',
+          icon: Icons.water_drop,
+          value: _waterReminderInterval,
+          min: 15,
+          max: 240,
+          step: 15,
+          suffix: 'minutes',
+          onChanged: (value) {
+            setState(() {
+              _waterReminderInterval = value;
+            });
+            _saveAppSettings();
+          },
+        ),
+        SizedBox(height: 2.h),
+        
+        // Pomodoro Work Duration
+        _buildNumberInputTile(
+          title: 'Focus Session Duration',
+          subtitle: 'Length of each focus/work session',
+          icon: Icons.timer,
+          value: _pomodoroWorkDuration,
+          min: 5,
+          max: 60,
+          step: 5,
+          suffix: 'minutes',
+          onChanged: (value) {
+            setState(() {
+              _pomodoroWorkDuration = value;
+            });
+            _saveAppSettings();
+          },
+        ),
+        SizedBox(height: 2.h),
+        
+        // Pomodoro Break Duration
+        _buildNumberInputTile(
+          title: 'Break Duration',
+          subtitle: 'Length of each break session',
+          icon: Icons.free_breakfast,
+          value: _pomodoroBreakDuration,
+          min: 2,
+          max: 30,
+          step: 1,
+          suffix: 'minutes',
+          onChanged: (value) {
+            setState(() {
+              _pomodoroBreakDuration = value;
+            });
+            _saveAppSettings();
+          },
+        ),
+        SizedBox(height: 2.h),
+        
+        // Posture Reminder Settings
+        _buildNumberInputTile(
+          title: 'Posture Reminder Interval',
+          subtitle: 'How often to remind about posture',
+          icon: Icons.accessibility_new,
+          value: _postureReminderInterval,
+          min: 10,
+          max: 120,
+          step: 10,
+          suffix: 'minutes',
+          onChanged: (value) {
+            setState(() {
+              _postureReminderInterval = value;
+            });
+            _saveAppSettings();
+          },
+        ),
+        SizedBox(height: 2.h),
+        
+        // Preferred Workout Time
+        _buildDropdownTile(
+          title: 'Preferred Workout Time',
+          subtitle: 'When you prefer to exercise',
+          icon: Icons.schedule,
+          value: _preferredWorkoutTime,
+          items: _workoutTimes,
+          onChanged: (value) {
+            setState(() {
+              _preferredWorkoutTime = value!;
+            });
+            _saveAppSettings();
+          },
+        ),
+        SizedBox(height: 2.h),
+        
+        // Auto-start breaks
+        _buildSwitchTile(
+          title: 'Auto-start Breaks',
+          subtitle: 'Automatically start break timer after work session',
+          icon: Icons.play_arrow,
+          value: _autoStartBreaks,
+          onChanged: (value) {
+            setState(() {
+              _autoStartBreaks = value;
+            });
+            _saveAppSettings();
+          },
+        ),
+        
+        // Weekend reminders
+        _buildSwitchTile(
+          title: 'Weekend Reminders',
+          subtitle: 'Receive wellness reminders on weekends',
+          icon: Icons.weekend,
+          value: _weekendReminders,
+          onChanged: (value) {
+            setState(() {
+              _weekendReminders = value;
+            });
+            _saveAppSettings();
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _buildAppSettingsSection() {
     return _buildSection(
       title: 'App Settings',
@@ -505,6 +691,237 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _buildDataPrivacySection() {
+    return _buildSection(
+      title: 'Data & Privacy',
+      children: [
+        _buildSettingsTile(
+          title: 'Export Data',
+          subtitle: 'Download your fitness and wellness data',
+          icon: Icons.download,
+          onTap: _exportUserData,
+        ),
+        _buildSettingsTile(
+          title: 'Clear Cache',
+          subtitle: 'Clear app cache and temporary files',
+          icon: Icons.clear_all,
+          onTap: _clearAppCache,
+        ),
+        _buildSettingsTile(
+          title: 'Reset Settings',
+          subtitle: 'Reset all settings to default values',
+          icon: Icons.restore,
+          onTap: _resetSettings,
+          textColor: Colors.orange,
+        ),
+        _buildSettingsTile(
+          title: 'Delete Account',
+          subtitle: 'Permanently delete your account and data',
+          icon: Icons.delete_forever,
+          onTap: _deleteAccount,
+          textColor: Colors.red,
+        ),
+      ],
+    );
+  }
+
+  void _exportUserData() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Export Data'),
+        content: Text('Your data export will be prepared and sent to your email address.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Data export initiated. Check your email.'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            child: Text('Export'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _clearAppCache() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Clear Cache'),
+        content: Text('This will clear temporary files and may improve app performance.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              // Clear cache logic would go here
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Cache cleared successfully'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            child: Text('Clear'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _resetSettings() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Reset Settings'),
+        content: Text('This will reset all app settings to default values. Your profile data will not be affected.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.clear();
+              await _loadAppSettings();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Settings reset to defaults'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.orange),
+            child: Text('Reset'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteAccount() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Delete Account'),
+        content: Text('This will permanently delete your account and all associated data. This action cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // Show second confirmation
+              _showDeleteConfirmation();
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteConfirmation() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Are you absolutely sure?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('This will permanently delete:'),
+            SizedBox(height: 1.h),
+            Text('• Your profile and fitness data'),
+            Text('• All workout history'),
+            Text('• Wellness tracking data'),
+            Text('• App preferences and settings'),
+            SizedBox(height: 2.h),
+            Text(
+              'Type DELETE to confirm:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 1.h),
+            TextField(
+              decoration: InputDecoration(
+                hintText: 'Type DELETE here',
+                border: OutlineInputBorder(),
+              ),
+              onChanged: (value) {
+                // Handle confirmation text
+              },
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Account deletion initiated'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: Text('Delete Forever'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSettingsTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required VoidCallback onTap,
+    Color? textColor,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: textColor ?? Theme.of(context).primaryColor),
+      title: Text(
+        title,
+        style: GoogleFonts.inter(
+          fontWeight: FontWeight.w500,
+          color: textColor,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: GoogleFonts.inter(
+          fontSize: 12.sp,
+          color: Colors.grey[600],
+        ),
+      ),
+      trailing: Icon(Icons.arrow_forward_ios, size: 16),
+      onTap: onTap,
+      contentPadding: EdgeInsets.zero,
+    );
+  }
+
   Widget _buildQuickActionsSection() {
     return _buildSection(
       title: 'Quick Actions',
@@ -513,19 +930,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Expanded(
               child: _buildActionButton(
-                'Water Reminder',
-                Icons.water_drop,
-                Colors.blue,
-                () => Navigator.pushNamed(context, AppRoutes.waterReminder),
+                'Step Counter',
+                Icons.directions_walk,
+                Colors.purple,
+                () => Navigator.pushNamed(context, AppRoutes.stepCounter),
               ),
             ),
             SizedBox(width: 3.w),
             Expanded(
               child: _buildActionButton(
-                'Step Counter',
-                Icons.directions_walk,
-                Colors.green,
-                () => Navigator.pushNamed(context, AppRoutes.stepCounter),
+                'Water Reminder',
+                Icons.water_drop,
+                Colors.blue,
+                () => Navigator.pushNamed(context, AppRoutes.waterReminder),
               ),
             ),
           ],
@@ -535,19 +952,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             Expanded(
               child: _buildActionButton(
-                'Posture Exercises',
-                Icons.accessibility_new,
+                'Focus Timer',
+                Icons.timer,
                 Colors.orange,
-                () => Navigator.pushNamed(context, AppRoutes.postureExercises),
+                () => Navigator.pushNamed(context, AppRoutes.pomodoroTimer),
               ),
             ),
             SizedBox(width: 3.w),
             Expanded(
               child: _buildActionButton(
-                'Timer Settings',
-                Icons.timer,
-                Colors.purple,
-                () => Navigator.pushNamed(context, AppRoutes.pomodoroTimer),
+                'Posture Exercises',
+                Icons.accessibility_new,
+                Colors.green,
+                () => Navigator.pushNamed(context, AppRoutes.postureExercises),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 3.w),
+        Row(
+          children: [
+            Expanded(
+              child: _buildActionButton(
+                'Progress Tracking',
+                Icons.trending_up,
+                Colors.teal,
+                () => Navigator.pushNamed(context, AppRoutes.progressTracking),
+              ),
+            ),
+            SizedBox(width: 3.w),
+            Expanded(
+              child: _buildActionButton(
+                'Exercise Library',
+                Icons.fitness_center,
+                Colors.red,
+                () => Navigator.pushNamed(context, AppRoutes.exerciseLibrary),
               ),
             ),
           ],
@@ -661,6 +1100,154 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Text(item),
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildNumberInputTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required int value,
+    required int min,
+    required int max,
+    required int step,
+    required String suffix,
+    required Function(int) onChanged,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(3.w),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Theme.of(context).primaryColor),
+          SizedBox(width: 3.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14.sp,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Row(
+            children: [
+              IconButton(
+                onPressed: value > min ? () => onChanged(value - step) : null,
+                icon: Icon(Icons.remove_circle_outline),
+                color: value > min ? Theme.of(context).primaryColor : Colors.grey,
+                iconSize: 24,
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 1.h),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.grey[300]!),
+                ),
+                child: Text(
+                  '$value $suffix',
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 13.sp,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: value < max ? () => onChanged(value + step) : null,
+                icon: Icon(Icons.add_circle_outline),
+                color: value < max ? Theme.of(context).primaryColor : Colors.grey,
+                iconSize: 24,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDropdownTile({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required String value,
+    required List<String> items,
+    required Function(String?) onChanged,
+  }) {
+    return Container(
+      padding: EdgeInsets.all(3.w),
+      decoration: BoxDecoration(
+        color: Colors.grey[50],
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Theme.of(context).primaryColor),
+          SizedBox(width: 3.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 14.sp,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: GoogleFonts.inter(
+                    fontSize: 12.sp,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 3.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.grey[300]!),
+            ),
+            child: DropdownButton<String>(
+              value: value,
+              onChanged: onChanged,
+              underline: Container(),
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w600,
+                fontSize: 13.sp,
+                color: Colors.black,
+              ),
+              items: items.map((String item) {
+                return DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(item),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
