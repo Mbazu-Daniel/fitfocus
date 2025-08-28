@@ -223,70 +223,133 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
               ),
 
-              SizedBox(height: 4.h),
+                      SizedBox(height: 4.h),
 
-              // Divider
-              Row(
-                children: [
-                  const Expanded(child: Divider()),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 4.w),
-                    child: Text(
-                      'or',
-                      style: GoogleFonts.inter(color: Colors.grey[600]),
-                    ),
-                  ),
-                  const Expanded(child: Divider()),
-                ],
-              ),
-
-              SizedBox(height: 4.h),
-
-              // Google sign in
-              OutlinedButton.icon(
-                onPressed: _isLoading ? null : _signInWithGoogle,
-                icon: const Icon(Icons.g_mobiledata, size: 24),
-                label: Text(
-                  'Continue with Google',
-                  style: GoogleFonts.inter(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 2.h),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 4.h),
-
-              // Sign up link
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Don't have an account? ",
-                    style: GoogleFonts.inter(color: Colors.grey[600]),
-                  ),
-                  TextButton(
-                    onPressed: () =>
-                        Navigator.pushNamed(context, AppRoutes.signup),
-                    child: Text(
-                      'Sign Up',
-                      style: GoogleFonts.inter(
-                        color: Theme.of(context).primaryColor,
-                        fontWeight: FontWeight.w600,
+                      // Divider
+                      Row(
+                        children: [
+                          const Expanded(child: Divider(thickness: 1)),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 4.w),
+                            child: Text(
+                              'or continue with',
+                              style: GoogleFonts.inter(
+                                color: Colors.grey[600],
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          const Expanded(child: Divider(thickness: 1)),
+                        ],
                       ),
-                    ),
+
+                      SizedBox(height: 4.h),
+
+                      // Alternative login methods
+                      Row(
+                        children: [
+                          // Google sign in
+                          Expanded(
+                            flex: _biometricsAvailable ? 1 : 2,
+                            child: OutlinedButton.icon(
+                              onPressed: _isLoading ? null : _signInWithGoogle,
+                              icon: Icon(
+                                Icons.g_mobiledata,
+                                size: 24,
+                                color: Colors.red[600],
+                              ),
+                              label: Text(
+                                'Google',
+                                style: GoogleFonts.inter(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.red[600],
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                padding: EdgeInsets.symmetric(vertical: 2.h),
+                                side: BorderSide(color: Colors.red[200]!, width: 1.5),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+                          
+                          // Biometric sign in (if available)
+                          if (_biometricsAvailable) ..[
+                            SizedBox(width: 3.w),
+                            Expanded(
+                              child: OutlinedButton.icon(
+                                onPressed: _isLoading ? null : _signInWithBiometrics,
+                                icon: Icon(
+                                  Icons.fingerprint,
+                                  size: 24,
+                                  color: Theme.of(context).primaryColor,
+                                ),
+                                label: Text(
+                                  'Biometric',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Theme.of(context).primaryColor,
+                                  ),
+                                ),
+                                style: OutlinedButton.styleFrom(
+                                  padding: EdgeInsets.symmetric(vertical: 2.h),
+                                  side: BorderSide(
+                                    color: Theme.of(context).primaryColor.withAlpha(128),
+                                    width: 1.5,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+
+                      SizedBox(height: 5.h),
+
+                      // Sign up link
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Don't have an account? ",
+                            style: GoogleFonts.inter(
+                              color: Colors.grey[600],
+                              fontSize: 15.sp,
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              Navigator.pushNamed(context, AppRoutes.signup);
+                            },
+                            child: Text(
+                              'Sign Up',
+                              style: GoogleFonts.inter(
+                                color: Theme.of(context).primaryColor,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 15.sp,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      
+                      SizedBox(height: 2.h),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
